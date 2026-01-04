@@ -3,13 +3,13 @@ import { Radio, Database, Handshake } from "lucide-react";
 const solutions = [
   {
     icon: Radio,
-    title: "Live Capacity Broadcasting",
+    title: "Live Readiness SaaS Dashboard",
     description: "Hospitals broadcast real-time bed availability, ICU status, and specialist rosters to all connected ambulances.",
   },
   {
     icon: Database,
     title: "Smart Dispatch Matching",
-    description: "Our platform matches patient needs with hospital capabilities—routing by readiness, not just proximity.",
+    description: "Smart routing to attract matched emergencies directly to your facilities. Seamless integration with ambulance networks.",
   },
   {
     icon: Handshake,
@@ -24,10 +24,10 @@ const SolutionSection = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            The MedLink Solution
+            The MediMatch Solution
           </h2>
           <p className="text-lg text-muted-foreground">
-            We replace guesswork with certainty—connecting every ambulance to every available bed in real-time.
+            We replace guesswork with certainty—connecting every ambulance to every available bed in real-time. The handshake your emergency department has been missing.
           </p>
         </div>
 

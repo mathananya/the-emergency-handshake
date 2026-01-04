@@ -1,16 +1,19 @@
 import { Building2, Truck, CheckCircle } from "lucide-react";
 
 const hospitalBenefits = [
-  "Maximize high-acuity admissions with predictive arrival data",
+  "Increased emergency patient conversions and revenue",
   "Eliminate ER bottlenecks through coordinated patient flow",
   "Prepare trauma teams before the ambulance arrives",
   "Optimize bed utilization across your entire network",
+  "Gain actionable analytics and system-wide insights",
+  "White-label options and premium add-ons available for multi-site chains"
+
 ];
 
 const fleetBenefits = [
   "Zero gate-side rejections—every dispatch is a guaranteed admission",
   "30% faster crew turnaround with confirmed handoffs",
-  "Route by hospital capability, not just the nearest zip code",
+  "Reduced rerouting and wait times",
   "Digital paper trail for every patient handover",
 ];
 
@@ -23,7 +26,7 @@ const BenefitsSection = () => {
             Benefits for Everyone in the Chain
           </h2>
           <p className="text-lg text-muted-foreground">
-            Whether you run a hospital network or an ambulance fleet, MedLink transforms your operations.
+            Whether you run a hospital network or an ambulance fleet, MediMatch transforms your operations.
           </p>
         </div>
 

@@ -27,13 +27,13 @@ const HeroSection = () => {
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 animate-fade-in-delay-1">
-            We bridge the critical gap between moving ambulances and hospital ERs, 
-            ensuring every patient arrives at a bed that's ready for them.
+            Real-time readiness platform that routes critical patients directly to your available beds, specialists, and equipment.
+            No more blind drop-offs. No more missed revenue opportunities.
           </p>
 
           {/* Supporting line */}
           <p className="text-base text-muted-foreground max-w-xl mx-auto mb-10 animate-fade-in-delay-2">
-            Trusted by leading hospital networks and ambulance fleets across the country.
+            Turn emergency chaos into predictable admissions and superior operational efficiency.
           </p>
 
           {/* CTAs */}

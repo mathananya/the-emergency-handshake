@@ -2,9 +2,14 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import HospitalMap from "@/components/readiness/HospitalMap";
 import HospitalScoreCards from "@/components/readiness/HospitalScoreCards";
-import { hospitalData } from "@/data/sampleHospitals";
+import LiveStatusBar from "@/components/readiness/LiveStatusBar";
+import { useRealtimeHospitals } from "@/hooks/useRealtimeHospitals";
 
 const ReadinessDashboard = () => {
+  const { hospitals, lastUpdated, isLive, toggleLive, refreshNow, updatedIds } = useRealtimeHospitals({
+    updateInterval: 5000,
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -28,6 +33,14 @@ const ReadinessDashboard = () => {
           </div>
         </section>
 
+        {/* Live Status Bar */}
+        <LiveStatusBar 
+          lastUpdated={lastUpdated}
+          isLive={isLive}
+          onToggleLive={toggleLive}
+          onRefresh={refreshNow}
+        />
+
         {/* Map Section */}
         <section className="py-12 lg:py-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,7 +50,7 @@ const ReadinessDashboard = () => {
                 Click on a hospital marker to view details
               </p>
             </div>
-            <HospitalMap hospitals={hospitalData} />
+            <HospitalMap hospitals={hospitals} updatedIds={updatedIds} />
           </div>
         </section>
 
@@ -50,7 +63,7 @@ const ReadinessDashboard = () => {
                 Scores calculated based on available beds, specialists on-call, and ER capacity
               </p>
             </div>
-            <HospitalScoreCards hospitals={hospitalData} />
+            <HospitalScoreCards hospitals={hospitals} updatedIds={updatedIds} />
           </div>
         </section>
       </main>

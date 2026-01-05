@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 interface HospitalMapProps {
   hospitals: Hospital[];
+  updatedIds?: Set<string>;
 }
 
 // Convert lat/lng to percentage positions on the India map image
@@ -31,8 +32,13 @@ const getScoreBorder = (score: number) => {
   return "ring-red-500/50";
 };
 
-const HospitalMap = ({ hospitals }: HospitalMapProps) => {
+const HospitalMap = ({ hospitals, updatedIds = new Set() }: HospitalMapProps) => {
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
+
+  // Update selected hospital data when hospitals update
+  const currentSelectedData = selectedHospital 
+    ? hospitals.find(h => h.id === selectedHospital.id) || selectedHospital
+    : null;
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
@@ -50,7 +56,8 @@ const HospitalMap = ({ hospitals }: HospitalMapProps) => {
         {/* Hospital Markers */}
         {hospitals.map((hospital) => {
           const pos = latLngToPosition(hospital.lat, hospital.lng);
-          const isSelected = selectedHospital?.id === hospital.id;
+          const isSelected = currentSelectedData?.id === hospital.id;
+          const isUpdated = updatedIds.has(hospital.id);
           
           return (
             <button
@@ -58,12 +65,12 @@ const HospitalMap = ({ hospitals }: HospitalMapProps) => {
               onClick={() => setSelectedHospital(hospital)}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 z-10 focus:outline-none focus:ring-2 focus:ring-primary rounded-full ${
                 isSelected ? "scale-125 z-20" : "hover:scale-110"
-              }`}
+              } ${isUpdated ? "animate-pulse" : ""}`}
               style={{ left: pos.x, top: pos.y }}
               aria-label={`${hospital.name} - Readiness Score: ${hospital.readinessScore}`}
             >
               <div 
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white ${getScoreColor(hospital.readinessScore)} ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white transition-colors duration-300 ${getScoreColor(hospital.readinessScore)} ${
                   isSelected ? `ring-4 ${getScoreBorder(hospital.readinessScore)}` : ""
                 }`}
               >
@@ -101,18 +108,18 @@ const HospitalMap = ({ hospitals }: HospitalMapProps) => {
 
       {/* Selected Hospital Details */}
       <div className="lg:col-span-1">
-        {selectedHospital ? (
+        {currentSelectedData ? (
           <Card className="h-full animate-fade-in">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-foreground">{selectedHospital.name}</h3>
+                  <h3 className="text-lg font-bold text-foreground">{currentSelectedData.name}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {selectedHospital.city}, {selectedHospital.state}
+                    {currentSelectedData.city}, {currentSelectedData.state}
                   </p>
                 </div>
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${getScoreColor(selectedHospital.readinessScore)}`}>
-                  {selectedHospital.readinessScore}
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold transition-colors duration-300 ${getScoreColor(currentSelectedData.readinessScore)}`}>
+                  {currentSelectedData.readinessScore}
                 </div>
               </div>
 
@@ -122,8 +129,8 @@ const HospitalMap = ({ hospitals }: HospitalMapProps) => {
                   <div>
                     <p className="text-sm font-medium text-foreground">Available Beds</p>
                     <p className="text-2xl font-bold text-foreground">
-                      {selectedHospital.emptyBeds}
-                      <span className="text-sm font-normal text-muted-foreground"> / {selectedHospital.totalBeds}</span>
+                      {currentSelectedData.emptyBeds}
+                      <span className="text-sm font-normal text-muted-foreground"> / {currentSelectedData.totalBeds}</span>
                     </p>
                   </div>
                 </div>
@@ -132,7 +139,7 @@ const HospitalMap = ({ hospitals }: HospitalMapProps) => {
                   <Users className="w-5 h-5 text-primary" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Specialists On-Call</p>
-                    <p className="text-2xl font-bold text-foreground">{selectedHospital.specialists}</p>
+                    <p className="text-2xl font-bold text-foreground">{currentSelectedData.specialists}</p>
                   </div>
                 </div>
 
@@ -141,8 +148,8 @@ const HospitalMap = ({ hospitals }: HospitalMapProps) => {
                   <div>
                     <p className="text-sm font-medium text-foreground">ER Capacity</p>
                     <p className="text-2xl font-bold text-foreground">
-                      {selectedHospital.erAvailable}
-                      <span className="text-sm font-normal text-muted-foreground"> / {selectedHospital.erCapacity} available</span>
+                      {currentSelectedData.erAvailable}
+                      <span className="text-sm font-normal text-muted-foreground"> / {currentSelectedData.erCapacity} available</span>
                     </p>
                   </div>
                 </div>

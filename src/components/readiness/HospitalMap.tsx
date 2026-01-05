@@ -1,96 +1,86 @@
 import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { Icon, DivIcon } from "leaflet";
 import { Hospital } from "@/data/sampleHospitals";
 import { Bed, Users, AlertCircle, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import "leaflet/dist/leaflet.css";
 
 interface HospitalMapProps {
   hospitals: Hospital[];
 }
 
-const getScoreColor = (score: number) => {
-  if (score >= 70) return "#22c55e"; // green
-  if (score >= 40) return "#f59e0b"; // amber
-  return "#ef4444"; // red
+// Convert lat/lng to percentage positions on the India map image
+// India bounds: lat 8-37, lng 68-97
+const latLngToPosition = (lat: number, lng: number) => {
+  const minLat = 6, maxLat = 38;
+  const minLng = 66, maxLng = 98;
+  
+  const x = ((lng - minLng) / (maxLng - minLng)) * 100;
+  const y = ((maxLat - lat) / (maxLat - minLat)) * 100;
+  
+  return { x: `${x}%`, y: `${y}%` };
 };
 
-const getScoreBg = (score: number) => {
+const getScoreColor = (score: number) => {
   if (score >= 70) return "bg-green-500";
   if (score >= 40) return "bg-amber-500";
   return "bg-red-500";
 };
 
-// Create custom marker icon
-const createMarkerIcon = (score: number) => {
-  const color = getScoreColor(score);
-  return new DivIcon({
-    className: "custom-marker",
-    html: `<div style="
-      width: 32px;
-      height: 32px;
-      background-color: ${color};
-      border: 3px solid white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      cursor: pointer;
-    ">${score}</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
-  });
+const getScoreBorder = (score: number) => {
+  if (score >= 70) return "ring-green-500/50";
+  if (score >= 40) return "ring-amber-500/50";
+  return "ring-red-500/50";
 };
 
 const HospitalMap = ({ hospitals }: HospitalMapProps) => {
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
 
-  // Center of India
-  const indiaCenter: [number, number] = [20.5937, 78.9629];
-
   return (
     <div className="grid lg:grid-cols-3 gap-6">
       {/* Map Container */}
-      <div className="lg:col-span-2 relative bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
-        <MapContainer
-          center={indiaCenter}
-          zoom={5}
-          scrollWheelZoom={true}
-          className="w-full h-[400px] lg:h-[500px] rounded-2xl"
-          style={{ zIndex: 1 }}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      <div className="lg:col-span-2 relative bg-gradient-to-br from-primary/5 via-background to-primary/10 rounded-2xl border border-border overflow-hidden shadow-sm min-h-[400px] lg:min-h-[500px]">
+        {/* India Map Background using OpenStreetMap static image */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/India_location_map.svg/800px-India_location_map.svg.png"
+            alt="Map of India"
+            className="w-full h-full object-contain opacity-60"
           />
-          {hospitals.map((hospital) => (
-            <Marker
+        </div>
+        
+        {/* Hospital Markers */}
+        {hospitals.map((hospital) => {
+          const pos = latLngToPosition(hospital.lat, hospital.lng);
+          const isSelected = selectedHospital?.id === hospital.id;
+          
+          return (
+            <button
               key={hospital.id}
-              position={[hospital.lat, hospital.lng]}
-              icon={createMarkerIcon(hospital.readinessScore)}
-              eventHandlers={{
-                click: () => setSelectedHospital(hospital),
-              }}
+              onClick={() => setSelectedHospital(hospital)}
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 z-10 focus:outline-none focus:ring-2 focus:ring-primary rounded-full ${
+                isSelected ? "scale-125 z-20" : "hover:scale-110"
+              }`}
+              style={{ left: pos.x, top: pos.y }}
+              aria-label={`${hospital.name} - Readiness Score: ${hospital.readinessScore}`}
             >
-              <Popup>
-                <div className="text-sm">
-                  <p className="font-bold">{hospital.name}</p>
-                  <p className="text-gray-600">{hospital.city}, {hospital.state}</p>
-                  <p className="mt-1">Readiness: <strong>{hospital.readinessScore}</strong></p>
+              <div 
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white ${getScoreColor(hospital.readinessScore)} ${
+                  isSelected ? `ring-4 ${getScoreBorder(hospital.readinessScore)}` : ""
+                }`}
+              >
+                {hospital.readinessScore}
+              </div>
+              {isSelected && (
+                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 translate-y-full bg-background border border-border rounded-lg px-2 py-1 shadow-lg whitespace-nowrap z-30">
+                  <p className="text-xs font-medium text-foreground">{hospital.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{hospital.city}</p>
                 </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+              )}
+            </button>
+          );
+        })}
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm rounded-lg p-3 border border-border z-[1000]">
+        <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 border border-border shadow-md">
           <p className="text-xs font-medium text-foreground mb-2">Readiness Level</p>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
@@ -121,7 +111,7 @@ const HospitalMap = ({ hospitals }: HospitalMapProps) => {
                     {selectedHospital.city}, {selectedHospital.state}
                   </p>
                 </div>
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${getScoreBg(selectedHospital.readinessScore)}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${getScoreColor(selectedHospital.readinessScore)}`}>
                   {selectedHospital.readinessScore}
                 </div>
               </div>

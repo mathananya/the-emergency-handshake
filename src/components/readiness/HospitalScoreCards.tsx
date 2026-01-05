@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 
 interface HospitalScoreCardsProps {
   hospitals: Hospital[];
+  updatedIds?: Set<string>;
 }
 
 const getScoreColor = (score: number) => {
@@ -25,17 +26,22 @@ const getProgressColor = (score: number) => {
   return "[&>div]:bg-red-500";
 };
 
-const HospitalScoreCards = ({ hospitals }: HospitalScoreCardsProps) => {
+const HospitalScoreCards = ({ hospitals, updatedIds = new Set() }: HospitalScoreCardsProps) => {
   // Sort by readiness score descending
   const sortedHospitals = [...hospitals].sort((a, b) => b.readinessScore - a.readinessScore);
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {sortedHospitals.map((hospital, index) => (
-        <Card 
-          key={hospital.id} 
-          className="group hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden"
-        >
+      {sortedHospitals.map((hospital, index) => {
+        const isUpdated = updatedIds.has(hospital.id);
+        
+        return (
+          <Card 
+            key={hospital.id} 
+            className={`group hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden ${
+              isUpdated ? "ring-2 ring-primary/50 animate-pulse" : ""
+            }`}
+          >
           <CardContent className="p-4">
             {/* Header */}
             <div className="flex items-start justify-between mb-3">
@@ -58,7 +64,7 @@ const HospitalScoreCards = ({ hospitals }: HospitalScoreCardsProps) => {
                 <h3 className="font-semibold text-foreground truncate">{hospital.name}</h3>
                 <p className="text-xs text-muted-foreground">{hospital.city}, {hospital.state}</p>
               </div>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold ${getScoreBg(hospital.readinessScore)}`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors duration-300 ${getScoreBg(hospital.readinessScore)}`}>
                 {hospital.readinessScore}
               </div>
             </div>
@@ -67,7 +73,7 @@ const HospitalScoreCards = ({ hospitals }: HospitalScoreCardsProps) => {
             <div className="mb-4">
               <Progress 
                 value={hospital.readinessScore} 
-                className={`h-2 ${getProgressColor(hospital.readinessScore)}`}
+                className={`h-2 transition-all duration-300 ${getProgressColor(hospital.readinessScore)}`}
               />
             </div>
 
@@ -101,7 +107,8 @@ const HospitalScoreCards = ({ hospitals }: HospitalScoreCardsProps) => {
             </div>
           </CardContent>
         </Card>
-      ))}
+        );
+      })}
     </div>
   );
 };

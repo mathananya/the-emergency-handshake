@@ -1,28 +1,19 @@
 import { useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { Icon, DivIcon } from "leaflet";
 import { Hospital } from "@/data/sampleHospitals";
-import { MapPin, Bed, Users, AlertCircle } from "lucide-react";
+import { Bed, Users, AlertCircle, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import "leaflet/dist/leaflet.css";
 
 interface HospitalMapProps {
   hospitals: Hospital[];
 }
 
-// Convert lat/lng to SVG coordinates for India map
-const latLngToSvg = (lat: number, lng: number) => {
-  // India bounds approximately: lat 8-37, lng 68-97
-  const minLat = 8, maxLat = 37;
-  const minLng = 68, maxLng = 97;
-  
-  const x = ((lng - minLng) / (maxLng - minLng)) * 100;
-  const y = ((maxLat - lat) / (maxLat - minLat)) * 100;
-  
-  return { x, y };
-};
-
 const getScoreColor = (score: number) => {
-  if (score >= 70) return "text-green-500 fill-green-500";
-  if (score >= 40) return "text-amber-500 fill-amber-500";
-  return "text-red-500 fill-red-500";
+  if (score >= 70) return "#22c55e"; // green
+  if (score >= 40) return "#f59e0b"; // amber
+  return "#ef4444"; // red
 };
 
 const getScoreBg = (score: number) => {
@@ -31,62 +22,75 @@ const getScoreBg = (score: number) => {
   return "bg-red-500";
 };
 
+// Create custom marker icon
+const createMarkerIcon = (score: number) => {
+  const color = getScoreColor(score);
+  return new DivIcon({
+    className: "custom-marker",
+    html: `<div style="
+      width: 32px;
+      height: 32px;
+      background-color: ${color};
+      border: 3px solid white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+    ">${score}</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16],
+  });
+};
+
 const HospitalMap = ({ hospitals }: HospitalMapProps) => {
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
+
+  // Center of India
+  const indiaCenter: [number, number] = [20.5937, 78.9629];
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
       {/* Map Container */}
       <div className="lg:col-span-2 relative bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
-        <svg
-          viewBox="0 0 100 100"
-          className="w-full h-[400px] lg:h-[500px]"
-          style={{ background: "linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%)" }}
+        <MapContainer
+          center={indiaCenter}
+          zoom={5}
+          scrollWheelZoom={true}
+          className="w-full h-[400px] lg:h-[500px] rounded-2xl"
+          style={{ zIndex: 1 }}
         >
-          {/* India outline (simplified) */}
-          <path
-            d="M35,15 L55,10 L70,15 L80,25 L85,40 L80,55 L75,70 L65,80 L55,85 L45,82 L35,75 L25,65 L20,50 L22,35 L28,22 Z"
-            fill="hsl(var(--primary) / 0.1)"
-            stroke="hsl(var(--primary) / 0.3)"
-            strokeWidth="0.5"
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          
-          {/* Hospital markers */}
-          {hospitals.map((hospital) => {
-            const { x, y } = latLngToSvg(hospital.lat, hospital.lng);
-            const isSelected = selectedHospital?.id === hospital.id;
-            
-            return (
-              <g
-                key={hospital.id}
-                transform={`translate(${x}, ${y})`}
-                onClick={() => setSelectedHospital(hospital)}
-                className="cursor-pointer transition-transform hover:scale-125"
-                style={{ transformOrigin: `${x}% ${y}%` }}
-              >
-                <circle
-                  r={isSelected ? 3.5 : 2.5}
-                  className={`${getScoreColor(hospital.readinessScore)} transition-all`}
-                  stroke="white"
-                  strokeWidth="0.5"
-                />
-                {isSelected && (
-                  <circle
-                    r="5"
-                    fill="none"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="0.3"
-                    className="animate-ping"
-                    opacity="0.5"
-                  />
-                )}
-              </g>
-            );
-          })}
-        </svg>
+          {hospitals.map((hospital) => (
+            <Marker
+              key={hospital.id}
+              position={[hospital.lat, hospital.lng]}
+              icon={createMarkerIcon(hospital.readinessScore)}
+              eventHandlers={{
+                click: () => setSelectedHospital(hospital),
+              }}
+            >
+              <Popup>
+                <div className="text-sm">
+                  <p className="font-bold">{hospital.name}</p>
+                  <p className="text-gray-600">{hospital.city}, {hospital.state}</p>
+                  <p className="mt-1">Readiness: <strong>{hospital.readinessScore}</strong></p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm rounded-lg p-3 border border-border">
+        <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm rounded-lg p-3 border border-border z-[1000]">
           <p className="text-xs font-medium text-foreground mb-2">Readiness Level</p>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">

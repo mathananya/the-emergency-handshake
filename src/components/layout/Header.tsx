@@ -10,6 +10,7 @@ const Header = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "The Emergency Handshake", path: "/emergency-handshake" },
+    { name: "Readiness Dashboard", path: "/readiness" },
     { name: "Contact Us", path: "/contact" },
   ];
 

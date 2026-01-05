@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import EmergencyHandshake from "./pages/EmergencyHandshake";
 import Contact from "./pages/Contact";
+import ReadinessDashboard from "./pages/ReadinessDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,6 +20,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/emergency-handshake" element={<EmergencyHandshake />} />
+          <Route path="/readiness" element={<ReadinessDashboard />} />
           <Route path="/contact" element={<Contact />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

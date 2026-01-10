@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Activity } from "lucide-react";
+import medimatchLogo from "@/assets/medimatch-logo.png";
 
 const Footer = () => {
   return (
@@ -9,9 +9,11 @@ const Footer = () => {
           {/* Logo & Tagline */}
           <div className="flex flex-col items-center md:items-start gap-3">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <Activity className="w-5 h-5 text-primary-foreground" />
-              </div>
+              <img 
+                src={medimatchLogo} 
+                alt="MediMatch Logo" 
+                className="w-8 h-8 rounded-lg"
+              />
               <span className="text-lg font-bold text-foreground">MediMatch</span>
             </Link>
             <p className="text-sm text-muted-foreground text-center md:text-left">

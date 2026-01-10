@@ -47,7 +47,7 @@ const ReadinessDashboard = () => {
             {/* Disclaimer */}
             <div className="mb-6 p-4 rounded-lg border border-amber-500/30 bg-amber-500/10">
               <p className="text-sm text-amber-700 dark:text-amber-400 flex items-start gap-2">
-                <span className="font-semibold">⚠️ Disclaimer:</span>
+                <span className="font-semibold">Disclaimer:</span>
                 <span>The data presented here is entirely fictional and intended solely for simulation and testing purposes. It does not represent any real entities, events, or information.</span>
               </p>
             </div>
